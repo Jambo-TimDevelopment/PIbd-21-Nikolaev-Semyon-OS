@@ -5,7 +5,7 @@ import java.util.Random;
 public class MemoryManager {
     private int countProcess;
     Disk disk = new Disk();
-    RAM RAM = new RAM(disk);
+    RAM RAM = new RAM();
 
     public void createProcess(int countProcess) {
         this.countProcess = countProcess;
@@ -24,7 +24,7 @@ public class MemoryManager {
             Process process = RAM.getProcess( random.nextInt( countProcess ));
             Page page = process.getPage( random.nextInt( process.getPageList().size() ) );
             System.out.println( "ОС запрашивает у процесса " + page.getProcessID() + " страницу " + page.getID() );
-            RAM.setInTableNRU( page );
+            RAM.setInTableNRU( page, disk );
         }
 
         System.out.println( "________________________________________________________________________\n" +

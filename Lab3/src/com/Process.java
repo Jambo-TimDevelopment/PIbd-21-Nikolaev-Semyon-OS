@@ -6,7 +6,6 @@ import java.util.Random;
 
 public class Process {
     Random random = new Random();
-
     private List<Page> pages = new LinkedList<Page>();
     private int ID;
     private int countPages = random.nextInt( 10 ) + 1;

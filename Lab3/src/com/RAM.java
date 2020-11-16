@@ -4,15 +4,10 @@ import java.util.LinkedList;
 import java.util.List;
 
 public class RAM {
-    private Disk disk;
-    private List<Process> processes = new LinkedList<Process>();
+   private List<Process> processes = new LinkedList<Process>();
     private List<PagesTable> pagesTables = new LinkedList<PagesTable>();
     private List<Page> physicalTable = new LinkedList<>();
     private final int sizeRAM = 10;
-
-    RAM(Disk disk){
-        this.disk = disk;
-    }
 
     public void addProcess(Process process) {
         processes.add( process );
@@ -36,7 +31,7 @@ public class RAM {
         }
     }
 
-    public void setInTableNRU(Page page) {
+    public void setInTableNRU(Page page, Disk disk) {
         if (physicalTable.contains(page)) { //
             System.out.print("Изменений в таблице физической памяти нет\n\n");
             return;
@@ -53,10 +48,10 @@ public class RAM {
                 break;
             }
         }
-        NRUAlgorithm( page );
+        NRUAlgorithm( page, disk );
     }
 
-    private void NRUAlgorithm(Page page) {
+    private void NRUAlgorithm(Page page, Disk disk) {
         int pageID = 0;
         for (int i = 0; physicalTable.get(i) != null && i < sizeRAM; i++) {
             if (physicalTable.get(i).getReferenced() != 1 && physicalTable.get(i).getModified() == 1) {
