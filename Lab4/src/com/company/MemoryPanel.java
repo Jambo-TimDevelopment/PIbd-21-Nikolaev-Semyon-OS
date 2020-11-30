@@ -11,7 +11,7 @@ import java.util.Objects;
 
 import static javax.swing.WindowConstants.EXIT_ON_CLOSE;
 
-public class MamoryPanel {
+public class MemoryPanel {
     private FileManager fileManager;
     private Memory physMemory;
     private FormMemory formMemory;
@@ -27,7 +27,7 @@ public class MamoryPanel {
     private JLabel labelName = new JLabel("Имя");
     private JLabel labelSizeFile = new JLabel("Размер файла");
     private JLabel labelSizeDisK = new JLabel("Размер диска");
-    private JLabel labelSizeSector = new JLabel("Размер сектора");
+    private JLabel labelSizeSector = new JLabel("Размер кластера");
     private JTextField textFieldName = new JTextField();
     private JTextField textFieldFile = new JTextField();
     private JTextField textFieldDisk = new JTextField();
@@ -35,7 +35,7 @@ public class MamoryPanel {
     private DefaultMutableTreeNode treeFile;
     private JTree tree;
 
-    public MamoryPanel() {
+    public MemoryPanel() {
         frame.setBounds(0, 0, 1400, 800);
         frame.setDefaultCloseOperation(EXIT_ON_CLOSE);
         frame.setVisible(true);
@@ -51,10 +51,10 @@ public class MamoryPanel {
         textFieldName.setBounds(1000, 320, 150, 20);
         labelSizeFile.setBounds(1050, 360, 100, 20);
         textFieldFile.setBounds(1000, 380, 150, 20);
-        labelSizeDisK.setBounds(400, 720, 70, 20);
-        textFieldDisk.setBounds(480, 720, 100, 20);
-        labelSizeSector.setBounds(600, 720, 80, 20);
-        textFieldSector.setBounds(680, 720, 100, 20);
+        labelSizeDisK.setBounds(400, 520, 70, 20);
+        textFieldDisk.setBounds(480, 520, 100, 20);
+        labelSizeSector.setBounds(600, 520, 80, 20);
+        textFieldSector.setBounds(680, 520, 100, 20);
         textFieldDisk.setText("1000");
         textFieldSector.setText("2");
         textFieldFile.setText("1");
@@ -126,7 +126,6 @@ public class MamoryPanel {
         buttonSetMemory.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 textFieldDisk.setEditable(false);
-                ;
                 textFieldSector.setEditable(false);
                 buttonSetMemory.setEnabled(false);
                 buttonCreateFile.setEnabled(true);

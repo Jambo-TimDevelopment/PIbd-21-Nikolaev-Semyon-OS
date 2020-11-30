@@ -19,9 +19,9 @@ public class FormMemory extends JPanel {
                 x = 0;
                 y += sizeX;
             }
-            if (memory.getCellIndex(i).getStatus() == 2) {
+            if (memory.getClusterIndex(i).getStatus() == 2) {
                 g.setColor(Color.red);
-            } else if (memory.getCellIndex(i).getStatus() == 0) {
+            } else if (memory.getClusterIndex(i).getStatus() == 0) {
                 g.setColor(Color.gray);
             } else {
                 g.setColor(Color.blue);

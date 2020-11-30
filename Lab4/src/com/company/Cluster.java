@@ -1,12 +1,12 @@
 package com.company;
 
-public class CellsClass {
+public class Cluster {
 
     private int size;
     private int index;
     private int status = 0;
 
-    public CellsClass(int size) {
+    public Cluster(int size) {
         this.size = size;
     }
 

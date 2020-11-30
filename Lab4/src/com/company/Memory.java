@@ -5,18 +5,18 @@ import java.util.ArrayList;
 public class Memory {
     private int sizeDisk;
     private int sizeSector;
-    private CellsClass[] cells;
+    private Cluster[] cells;
 
     public Memory(int sizeDisc, int sizeSector) {
         this.sizeDisk = sizeDisc;
         this.sizeSector = sizeSector;
-        cells = new CellsClass[sizeDisc / sizeSector];
+        cells = new Cluster[sizeDisc / sizeSector];
         for (int i = 0; i < cells.length; i++) {
-            cells[i] = new CellsClass(sizeSector);
+            cells[i] = new Cluster(sizeSector);
         }
     }
 
-    public CellsClass getCellIndex(int index) {
+    public Cluster getClusterIndex(int index) {
         if (index > -1 && index < cells.length) {
             return cells[index];
         }
