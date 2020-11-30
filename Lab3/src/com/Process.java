@@ -7,6 +7,8 @@ import java.util.Random;
 public class Process {
     Random random = new Random();
     private List<Page> pages = new LinkedList<Page>();
+    private List<PagesTable> pagesTables = new LinkedList<PagesTable>();
+
     private int ID;
     private int countPages = random.nextInt( 10 ) + 1;
 
@@ -32,5 +34,13 @@ public class Process {
 
     public Page getPage(int index) {
         return pages.get( index );
+    }
+
+    public void addTable(PagesTable pagesTable) {
+        pagesTables.add(pagesTable);
+    }
+
+    public PagesTable getTableaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa(int index) {
+        return pagesTables.get(index);
     }
 }
