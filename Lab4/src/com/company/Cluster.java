@@ -1,28 +1,27 @@
 package com.company;
 
 public class Cluster {
+    private int indexInPhysicalMemory;
+    private ClusterStatus clusterStatus;
 
-    private int size;
-    private int index;
-    private int status = 0;
-
-    public Cluster(int size) {
-        this.size = size;
+    Cluster(int index, ClusterStatus clusterStatus){
+        this.indexInPhysicalMemory = index;
+        this.clusterStatus = clusterStatus;
     }
 
-    public int getIndex() {
-        return index;
+    public void setIndexInPhysicalMemory(int index) {
+        this.indexInPhysicalMemory = index;
     }
 
-    public void setIndex(int index) {
-        this.index = index;
+    public int getIndexInPhysicalMemory() {
+        return indexInPhysicalMemory;
     }
 
-    public int getStatus() {
-        return status;
+    public void setClusterStatus(ClusterStatus clusterStatus) {
+        this.clusterStatus = clusterStatus;
     }
 
-    public void setStatus(int status) {
-        this.status = status;
+    public ClusterStatus getClusterStatus() {
+        return clusterStatus;
     }
-} 
+}

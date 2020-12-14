@@ -1,189 +1,182 @@
 package com.company;
 
-import javax.swing.tree.DefaultMutableTreeNode;
-import java.util.ArrayList;
+import java.util.LinkedList;
 
 public class FileManager {
+    private File currentFile;
+    private Catalog rootCatalog;
+    private File fileInClipBoard;
+    private Disk disk;
 
-    private FileManager rootFile = new FileManager("root", null, true, 1);
-    private FileManager selected = rootFile;
-    private FileManager fileForCopy;
-    private Memory physMemory;
-    private String name;
-    private FileManager parent;
-    private boolean isFolder;
-    public ArrayList child;
-    private int indexFirstCell;
-    private int size = -1;
-
-    private FileManager(Memory PhisMemory) {
-        this.physMemory = PhisMemory;
-        rootFile.setSize(1);
-        PhisMemory.searchPlace(rootFile);
+    FileManager(Disk disk) {
+        System.out.println("Загружен файловый менеджер");
+        this.disk = disk;
+        rootCatalog = new Catalog("root", null, 1, new LinkedList<>());
+        rootCatalog.getClusterContainer().add(new Cluster(0, ClusterStatus.IS_LOAD));
+        rootCatalog.setRootCatalog(true);
+        addFile(rootCatalog);
+        setCurrentFile(rootCatalog);
+        fileInClipBoard = new File("fileInClipBoard", null, -1, new LinkedList<>());
     }
 
-    public FileManager(String name, FileManager parent, boolean isFolder, int size) {
-        this.name = name;
-        this.parent = parent;
-        this.isFolder = isFolder;
-        this.size = size;
-
-        if (isFolder) {
-            child = new ArrayList();
-        }
-    }
-    public FileManager() { }
-
-    public FileManager clone() {
-        FileManager newFile = new FileManager();
-        newFile.setSize(size);
-        setName(name);
-        setFolder(isFolder);
-        if (isFolder) {
-            ArrayList child = new ArrayList();
-            for (Object managerFile : this.child) {
-                boolean add = child.add(managerFile);
-            }
-            newFile.setChild(child);
-        }
-        return newFile;
-    }
-
-    public FileManager getRootFile() {
-        return rootFile;
-    }
-
-    public FileManager getSelected() {
-        return selected;
-    }
-
-    public void setSelectedFile(DefaultMutableTreeNode node) {
-        this.selected = (FileManager) node.getUserObject();
-    }
-
-    public FileManager copy() {
-        return fileForCopy = selected;
-    }
-
-    public void copyFilesCatalog(FileManager newFile) {
-        for (Object file : newFile.getChild()) {
-            physMemory.searchPlace((FileManager)file);
-            if (((FileManager) file).isFolder()) {
-                copyFilesCatalog((FileManager)file);
+    public void resetSelectedMarker() {
+        System.out.println("Снимаем маркер с выбранных кластеров");
+        for (Cluster cluster : disk.getPhysicalMemory()) {
+            if (cluster.getClusterStatus() == ClusterStatus.IS_SELECTED) {
+                cluster.setClusterStatus(ClusterStatus.IS_LOAD);
             }
         }
     }
 
-    public boolean paste() {
-        if (selected.isFolder()) {
-            try {
-                FileManager newFile = fileForCopy.clone();
-                newFile.setParent(selected);
-                selected.getChild().add(newFile);
-                physMemory.searchPlace(newFile);
-                if (newFile.isFolder()) {
-                    copyFilesCatalog(newFile);
-                }
-            } catch (Exception eх) {
-                eх.printStackTrace();
+    public void setCurrentFile(File file) {
+        System.out.println("Обновлен выбранный файл");
+        for (Cluster cluster : file.getClusterContainer()) {
+            cluster.setClusterStatus(ClusterStatus.IS_SELECTED);
+        }
+        if (file.getClass() == Catalog.class) {
+            for (File childFile : ((Catalog) file).getChild()) {
+                setCurrentFile((childFile));
             }
-            return true;
+        }
+        currentFile = file;
+    }
+
+    public File getCurrentFile() {
+        return currentFile;
+    }
+
+    public File createFile(String fileName, int size) {
+        if (currentFile.getClass() == Catalog.class) {
+            LinkedList<Cluster> clusterContainer = new LinkedList<>();
+            int clusterSaveOutOfDisk = -1;
+            for (int i = 0; i < size; i++) {
+                clusterContainer.add(new Cluster(clusterSaveOutOfDisk, ClusterStatus.IS_EMPTY));
+            }
+            File file = new File(fileName, ((Catalog) currentFile), size, clusterContainer);
+            System.out.println("Файл --" + fileName + "-- был инициализирован");
+            if (addFile(file)) {
+                ((Catalog) currentFile).addChild(file);
+            }
+            return file;
         } else {
-            return false;
+            System.out.println("Текущий файл не является каталогом");
+            LinkedList<Cluster> clusterContainer = new LinkedList<>();
+            int clusterSaveOutOfDisk = -1;
+            for (int i = 0; i < size; i++) {
+                clusterContainer.add(new Cluster(clusterSaveOutOfDisk, ClusterStatus.IS_EMPTY));
+            }
+            File file = new File(fileName, null, size, clusterContainer);
+            System.out.println("Файл --" + fileName + "-- был инициализирован");
+            return file;
         }
     }
 
-    public boolean createFile(String nameFile, boolean folder, int size) {
-        if (selected.isFolder()) {
-            FileManager newFile = new FileManager(nameFile, selected, folder, size);
-            if (folder) {
-                newFile.setSize(1);
+    public Catalog createCatalog(String nameCatalog) {
+        if(currentFile.getClass() == Catalog.class) {
+            int size = 1;
+            LinkedList<Cluster> clusterContainer = new LinkedList<>();
+            int clusterSaveOutOfDisk = -1;
+            for (int i = 0; i < size; i++) {
+                clusterContainer.add(new Cluster(clusterSaveOutOfDisk, ClusterStatus.IS_EMPTY));
+            }
+            Catalog catalog = new Catalog(nameCatalog, ((Catalog) currentFile), size, clusterContainer);
+            System.out.println("Каталог --" + nameCatalog + "-- был инициализирован");
+            if (addFile(catalog)) {
+                ((Catalog) currentFile).addChild(catalog);
+                return catalog;
             } else {
-                newFile.setSize(size);
+                System.out.println("Добавление файла невозможно, недостаточно места на диске");
+                return null;
             }
-            physMemory.searchPlace(newFile);
-            selected.getChild().add(newFile);
-            return true;
         } else {
-            return false;
+            int size = 1;
+            LinkedList<Cluster> clusterContainer = new LinkedList<>();
+            Catalog catalog = new Catalog(nameCatalog, ((Catalog) currentFile), size, clusterContainer);
+            System.out.println("Каталог --" + nameCatalog + "-- был инициализирован");
+            return catalog;
         }
     }
 
-    public boolean delete() {
-        if (selected == rootFile) {
+    public boolean addFile(File file) {
+        if (file == null) {
+            System.out.println("Создать файл не удалось file = null!!");
             return false;
-        } else {
-            selected.getParent().getChild().remove(selected);
-            if (selected.isFolder()) {
-                deleteFolder(selected.getChild());
-            }
-            physMemory.clearFile(selected);
         }
+        if (!disk.checkEmptyMemoryForFile(file)) {
+            System.out.println("Недостаточно метсада на диске для данного файла!");
+            return false;
+        }
+        if(file.getParent() == null){
+            file.setParent((Catalog) currentFile);
+            System.out.println("Добавлен родитель из текущего файла");
+        }
+        for (Cluster cluster : file.getClusterContainer()) {
+            disk.loadClusterInMemory(cluster);
+        }
+        if (file.getClass() == Catalog.class) {
+            System.out.println("Добавление дочерних элементов каталога --" + file.getName());
+            for (File child : ((Catalog) file).getChild()) {
+                addFile(child);
+            }
+        }
+        System.out.println("--->Файл --" + file.name + "-- успешно загружен на диск!");
         return true;
     }
 
-    public void deleteFolder(ArrayList<FileManager> files) {
-        for (FileManager file : files) {
-            if (file.isFolder()) {
-                deleteFolder(file.getChild());
-            }
-            physMemory.clearFile(file);
+    public void removeFile(File file) {
+        if (file.getClass() == Catalog.class && ((Catalog) file).isRootCatalog()) {
+            System.out.println("Корневой каталог нельзя удалять!");
+            return;
         }
-    }
-
-    public void move() {
-        for (int i = 0; i < selected.getParent().child.size(); i++) {
-            if (selected.getParent().child.get(i) == selected) {
-                selected.getParent().child.remove(i);
-            }
+        for (Cluster cluster : file.getClusterContainer()) {
+            disk.removeClusterFromFile(cluster);
         }
+        file.getParent().getChild().remove(currentFile);
+        if (file.getClass() == Catalog.class) {
+            for (File childFile : ((Catalog) file).getChild()) {
+                removeFile(childFile);
+            }
+
+        }
+
+        System.out.println("Удаление файла прошло успешно");
     }
 
-    public String toString() {
-        return name;
+    public File copyFile(File file) {
+        System.out.println("Копировние файла --" + file.getName() + "--...");
+        File newFile = null;
+        if (file.getName() == "root") {
+            System.out.println("Корневой каталог копированию не подлежит!!!");
+            return null;
+        }
+        if (file.getClass() == Catalog.class) {
+            newFile = createCatalog(file.getName());
+            for (File child : ((Catalog) file).getChild()) {
+                ((Catalog) newFile).addChild(child);
+            }
+        } else {
+            newFile = createFile(file.getName(), file.getSize());
+            System.out.println("Создана копия файла --" + file.getName() + "--" );
+        }
+        System.out.println("Копировние файла --" + file.getName() + "-- завершено");
+        return newFile;
     }
 
-    public void setName(String name) {
-        this.name = name;
+    public void reparentFile(Catalog newParent, File file) {
+        LinkedList<File> oldParentChild = file.getParent().getChild();
+        newParent.addChild(file);
+        oldParentChild.remove(file);
     }
 
-    public FileManager getParent() {
-        return parent;
+    public Catalog getRootCatalog() {
+        return rootCatalog;
     }
 
-    public void setParent(FileManager parent) {
-        this.parent = parent;
+    public File getFileInClipBoard() {
+        return fileInClipBoard;
     }
 
-    public int getSize() {
-        return size;
+    public void setFileInClipBoard(File fileInClipBoard) {
+        this.fileInClipBoard = fileInClipBoard;
     }
-
-    public void setSize(int size) {
-        this.size = size;
-    }
-
-    public boolean isFolder() {
-        return isFolder;
-    }
-
-    public void setFolder(boolean folder) {
-        this.isFolder = folder;
-    }
-
-    public ArrayList getChild() {
-        return child;
-    }
-
-    public void setChild(ArrayList child) {
-        this.child = child;
-    }
-
-    public int getIndexFirstCell() {
-        return indexFirstCell;
-    }
-
-    public void setIndexFirstCell(int indexFirstCell) {
-        this.indexFirstCell = indexFirstCell;
-    }
-} 
+}
