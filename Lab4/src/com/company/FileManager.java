@@ -108,6 +108,9 @@ public class FileManager {
         }
         if(file.getParent() == null){
             file.setParent((Catalog) currentFile);
+            if(file.name != "root") {
+                ((Catalog) currentFile).addChild(file);
+            }
             System.out.println("Добавлен родитель из текущего файла");
         }
         for (Cluster cluster : file.getClusterContainer()) {

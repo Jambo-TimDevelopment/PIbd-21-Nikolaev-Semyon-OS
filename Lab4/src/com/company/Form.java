@@ -194,7 +194,6 @@ public class Form {
         treeFileSystem.addTreeSelectionListener( new TreeSelectionListener() {
             @Override
             public void valueChanged(TreeSelectionEvent treeSelectionEvent) {
-                //System.out.println(((DefaultMutableTreeNode)Objects.requireNonNull(  treeFileSystem.getSelectionPath().getLastPathComponent() )).getUserObject().getClass().toString());
                 fileManager.resetSelectedMarker();
                 fileManager.setCurrentFile(
                         (File) ( (DefaultMutableTreeNode)Objects.requireNonNull(
