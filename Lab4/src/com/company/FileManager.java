@@ -72,7 +72,7 @@ public class FileManager {
     }
 
     public Catalog createCatalog(String nameCatalog) {
-        if(currentFile.getClass() == Catalog.class) {
+        if (currentFile.getClass() == Catalog.class) {
             int size = 1;
             LinkedList<Cluster> clusterContainer = new LinkedList<>();
             int clusterSaveOutOfDisk = -1;
@@ -102,20 +102,26 @@ public class FileManager {
             System.out.println("Создать файл не удалось file = null!!");
             return false;
         }
-        if (!disk.checkEmptyMemoryForFile(file)) {
+        if (disk.checkEmptyMemoryForFile(file) == -1) {
             System.out.println("Недостаточно метсада на диске для данного файла!");
             return false;
         }
-        if(file.getParent() == null){
+        if (file.getParent() == null) {
             file.setParent((Catalog) currentFile);
-            if(file.name != "root") {
+            if (file.name != "root") {
                 ((Catalog) currentFile).addChild(file);
             }
             System.out.println("Добавлен родитель из текущего файла");
         }
-        for (Cluster cluster : file.getClusterContainer()) {
-            disk.loadClusterInMemory(cluster);
+
+        boolean flag = false;
+        for (int j = 0; j < disk.getPhysicalMemory().length; j++) {
+            if (disk.loadFileInMemory(currentFile, j)){
+                flag = flag || true;
+                break;
+            }
         }
+
         if (file.getClass() == Catalog.class) {
             System.out.println("Добавление дочерних элементов каталога --" + file.getName());
             for (File child : ((Catalog) file).getChild()) {
@@ -159,7 +165,7 @@ public class FileManager {
             }
         } else {
             newFile = createFile(file.getName(), file.getSize());
-            System.out.println("Создана копия файла --" + file.getName() + "--" );
+            System.out.println("Создана копия файла --" + file.getName() + "--");
         }
         System.out.println("Копировние файла --" + file.getName() + "-- завершено");
         return newFile;

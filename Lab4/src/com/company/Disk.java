@@ -23,26 +23,35 @@ public class Disk {
         return physicalMemory;
     }
 
-    public boolean checkEmptyMemoryForFile(File file){
+    public int checkEmptyMemoryForFile(File file){
+        int startIndex = 1;
         int sizeFile = file.getSize();
         int countEmptyClusters = 0;
         for(int i = 0; i < countCluster; i++){
             if(physicalMemory[i].getClusterStatus() == ClusterStatus.IS_EMPTY){
+                if(countEmptyClusters == 0){
+                    startIndex = i;
+                }
                 countEmptyClusters++;
+            }else{
+                countEmptyClusters = 0;
             }
         }
-        return sizeFile <= countEmptyClusters;
+        return startIndex;
     }
 
-    public void loadClusterInMemory(Cluster cluster) {
-        for(int i = 0; i < countCluster; i++){
+    public boolean loadFileInMemory(File file, int startIndex) {
+        int countLoadClusters = 0;
+        for(int i = startIndex; i < countCluster ||
+                countLoadClusters < file.getClusterContainer().size(); i++){
             if(physicalMemory[i].getClusterStatus() == ClusterStatus.IS_EMPTY){
-                cluster.setIndexInPhysicalMemory(i);
-                cluster.setClusterStatus(ClusterStatus.IS_LOAD);
-                physicalMemory[i] = cluster;
-                return;
+                physicalMemory[i].setClusterStatus(ClusterStatus.IS_LOAD);
+                countLoadClusters++;
+            }else{
+                countLoadClusters = 0;
             }
         }
+        return true;
     }
 
     public void removeClusterFromFile(Cluster cluster){
